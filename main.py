@@ -5,7 +5,6 @@ from chess import Chess
 
 def main():
     chess = Chess()
-    print(chess.board)
 
     root = tk.Tk()
     root.title("Chess")
