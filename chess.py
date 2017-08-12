@@ -93,8 +93,7 @@ class Chess(object):
         if played == "b":
             self.board.fullmove_number += 1
 
-        self.board.position2fen()
-        print(self.board)
+        self.board.update_fen()
 
     def available_moves(self, origin):
         piece = self.board[origin]
