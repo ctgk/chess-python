@@ -1,16 +1,16 @@
 import tkinter as tk
-from board import Board
+from gui import GUI
 from chess import Chess
 
 
 def main():
-    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-    chess = Chess(fen)
+    chess = Chess()
+    print(chess.board)
 
     root = tk.Tk()
     root.title("Chess")
-    board = Board(root, chess)
-    board.pack()
+    gui = GUI(root, chess)
+    gui.pack()
     root.mainloop()
 
 
