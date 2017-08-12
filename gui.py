@@ -6,6 +6,8 @@ class GUI(tk.Frame):
 
     rows = 8
     columns = 8
+    original_img_size = (100, 100)
+    icon_size = (60, 60)
     files = ["a", "b", "c", "d", "e", "f", "g", "h"]
     ranks = ["8", "7", "6", "5", "4", "3", "2", "1"]
     light_color = "#FFDEAD"
@@ -44,20 +46,20 @@ class GUI(tk.Frame):
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
 
         # create icons
-        light_bg = Image.new("RGBA", (100, 100), self.light_color)
-        dark_bg = Image.new("RGBA", (100, 100), self.dark_color)
-        highlight_bg = Image.new("RGBA", (100, 100), "yellow")
+        light_bg = Image.new("RGBA", self.original_img_size, self.light_color)
+        dark_bg = Image.new("RGBA", self.original_img_size, self.dark_color)
+        highlight_bg = Image.new("RGBA", self.original_img_size, "yellow")
         self.icons = {}
         for key, path in self.icon_path.items():
             img = Image.open(path)
             light_img = Image.alpha_composite(light_bg, img)
-            light_img = light_img.resize((32, 32)).convert("RGB")
+            light_img = light_img.resize(self.icon_size).convert("RGB")
             self.icons[self.light_color + key] = ImageTk.PhotoImage(light_img)
             dark_img = Image.alpha_composite(dark_bg, img)
-            dark_img = dark_img.resize((32, 32)).convert("RGB")
+            dark_img = dark_img.resize(self.icon_size).convert("RGB")
             self.icons[self.dark_color + key] = ImageTk.PhotoImage(dark_img)
             highlight_img = Image.alpha_composite(highlight_bg, img)
-            highlight_img = highlight_img.resize((32, 32)).convert("RGB")
+            highlight_img = highlight_img.resize(self.icon_size).convert("RGB")
             self.icons["yellow" + key] = ImageTk.PhotoImage(highlight_img)
 
     def coords2notation(self, row, col):
