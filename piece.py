@@ -53,8 +53,10 @@ class Piece(object):
             self.board = board
         self.board[position] = self
         self.position = position
+        self.home = position
 
     def move_to(self, dest):
+        captured = self.board.isdifferentcolor(self.position, dest)
         self.board[dest] = self
         self.board[self.position] = None
         self.position = dest
@@ -66,7 +68,45 @@ class Pawn(Piece):
         super().__init__(color)
         self.abbreviation = "p" if color == "b" else "P"
 
+    def possible_moves(self):
+        moves = []
+        file = self.position[0]
+        rank = self.position[1]
+        sign = -1 if self.color == "w" else 1
+
+        # standard move
+        dest = self.board.destination(self.position, (sign, 0))
+        if dest is not None:
+            moves.append(dest)
+
+            # moving two squares
+            if self.position == self.home:
+                dest = self.board.destination(self.position, (2 * sign, 0))
+                if dest is not None:
+                    moves.append(dest)
+
+        # attacking moves
+        dest_candidates = [
+            self.board.destination(self.position, (sign, d)) for d in [-1, 1]
+        ]
+        for cand in dest_candidates:
+            if cand is None:
+                continue
+            if self.board.isdifferentcolor(self.position, cand):
+                moves.append(cand)
+            if self.board.enpassant_target == cand:
+                moves.append(cand)
+
+        return moves
+
     def move_to(self, dest):
+        # next en passant target square
+        if self.position == self.home and dest[1] in ["4", "5"]:
+            enpassant_target = self.home[0] + ("3" if dest[1] == "4" else "6")
+        else:
+            enpassant_target = "-"
+
+        # move this piece
         super().move_to(dest)
 
         # promotion
@@ -74,6 +114,15 @@ class Pawn(Piece):
             q = Queen(self.color)
             q.place_at(self.position, self.board)
             del self
+
+        # en passant capturing
+        if dest == self.board.enpassant_target:
+            sign = -1 if self.color == "w" else 1
+            enemy_position = self.board.destination(dest, (-sign, 0))
+            self.board[enemy_position] = None
+
+        # update en passant target square
+        self.board.enpassant_target = enpassant_target
 
 
 class Knight(Piece):
@@ -96,6 +145,21 @@ class Rook(Piece):
         super().__init__(color)
         self.abbreviation = "r" if color == "b" else "R"
 
+    def move_to(self, dest):
+        # erase castiling availability
+        if self.color == "w":
+            home_rank = "1"
+            letters = ["K", "Q"]
+        else:
+            home_rank = "8"
+            letters = ["k", "q"]
+        if self.position == "h" + home_rank:
+            self.board.castling = self.board.castling.replace(letters[0], "")
+        elif self.position == "a" + home_rank:
+            self.board.castling = self.board.castling.replace(letters[1], "")
+
+        super().move_to(dest)
+
 
 class Queen(Piece):
 
@@ -112,10 +176,19 @@ class King(Piece):
 
     def move_to(self, dest):
         # castling
-        home_rank = "1" if self.color == "w" else "8"
-        if self.position == "e" + home_rank and dest == "g" + home_rank:
+        if self.color == "w":
+            home_rank = "1"
+            table = str.maketrans({"K": "", "Q": ""})
+        else:
+            home_rank = "8"
+            table = str.maketrans({"k": "", "q": ""})
+
+        if self.position == self.home:
+            self.board.castling = self.board.castling.translate(table)
+
+        if self.position == self.home and dest == "g" + home_rank:
             self.board["h" + home_rank].move_to("f" + home_rank)
-        elif self.position == "e" + home_rank and dest == "c" + home_rank:
+        elif self.position == self.home and dest == "c" + home_rank:
             self.board["a" + home_rank].move_to("d" + home_rank)
 
         super().move_to(dest)

@@ -37,47 +37,21 @@ class Chess(object):
         self.history.append(deepcopy(self.board))
         piece.move_to(dest)
 
-        # player turn
-        self.board.playing = "w" if played == "b" else "b"
+        # update player turn
+        self.board.playing = "w" if piece.color == "b" else "b"
 
-        # castling availability
-        castling = self.board.castling_availability
-        if piece == "K":
-            castling = castling.replace("K", "")
-            castling = castling.replace("Q", "")
-        elif piece == "k":
-            castling = castling.replace("k", "")
-            castling = castling.replace("q", "")
-        elif piece == "R":
-            if origin == "h1":
-                castling = castling.replace("K", "")
-            elif origin == "a1":
-                castling = castling.replace("Q", "")
-        elif piece == "r":
-            if origin == "h8":
-                castling = castling.replace("k", "")
-            elif origin == "a8":
-                castling = castling.replace("q", "")
-        if castling == "":
-            castling = "-"
-        self.board.castling_availability = castling
-
-        # en passant target
-        if piece == "p" and origin[1] == "7" and dest[1] == "5":
-            self.board.enpassant_target = origin[0] + "6"
-        elif piece == "P" and origin[1] == "2" and dest[1] == "4":
-            self.board.enpassant_target = origin[0] + "3"
-        else:
+        # update en passant target square
+        if piece.name != "Pawn":
             self.board.enpassant_target = "-"
 
-        # halfmove clock
+        # update halfmove clock
         if self.history[-1][dest] is None and piece.name != "Pawn":
             self.board.halfmove_clock += 1
         else:
             self.board.halfmove_clock = 0
 
-        # fullmove number
-        if played == "b":
+        # update fullmove number
+        if piece.color == "b":
             self.board.fullmove_number += 1
 
         self.board.update_fen()
@@ -88,7 +62,8 @@ class Chess(object):
         if piece is None:
             return []
         elif piece.name == "Pawn":
-            return self.pawn_moves(origin)
+            return piece.possible_moves()
+            # return self.pawn_moves(origin)
         elif piece.name == "Knight":
             return self.knight_moves(origin)
         elif piece.name == "Bishop":
@@ -184,13 +159,13 @@ class Chess(object):
         rank = "1" if color == "w" else "8"
 
         if (
-            side[0] in self.board.castling_availability
+            side[0] in self.board.castling
             and self.board["f" + rank] is None
             and self.board["g" + rank] is None
         ):
             moves.append("g" + rank)
         if (
-            side[1] in self.board.castling_availability
+            side[1] in self.board.castling
             and self.board["d" + rank] is None
             and self.board["c" + rank] is None
             and self.board["b" + rank] is None
