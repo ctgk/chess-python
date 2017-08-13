@@ -1,6 +1,7 @@
 from copy import deepcopy
 from board import Board
 from error import NotYourTurn, InvalidMove
+from piece import abbr2piece
 
 
 class Chess(object):
@@ -24,7 +25,7 @@ class Chess(object):
             return 0
 
         # raise error if it's not the player's turn
-        played = "w" if piece.isupper() else "b"
+        played = piece.color
         if played != self.board.playing:
             color = "white" if played == "w" else "black"
             raise NotYourTurn(f"It's not {color}'s turn")
@@ -39,16 +40,16 @@ class Chess(object):
         # castling
         if piece == "K" and origin == "e1" and dest == "g1":
             self.board["h1"] = None
-            self.board["f1"] = "R"
+            self.board["f1"] = abbr2piece("R")
         elif piece == "K" and origin == "e1" and dest == "c1":
             self.board["a1"] = None
-            self.board["d1"] = "R"
+            self.board["d1"] = abbr2piece("R")
         elif piece == "k" and origin == "e8" and dest == "g8":
             self.board["h8"] = None
-            self.board["f8"] = "r"
+            self.board["f8"] = abbr2piece("r")
         elif piece == "k" and origin == "e8" and dest == "c8":
             self.board["a8"] = None
-            self.board["d8"] = "r"
+            self.board["d8"] = abbr2piece("r")
 
         # player turn
         self.board.playing = "w" if played == "b" else "b"
@@ -84,7 +85,7 @@ class Chess(object):
             self.board.enpassant_target = "-"
 
         # halfmove clock
-        if self.history[-1][dest] is None and piece.lower() != "p":
+        if self.history[-1][dest] is None and piece.name != "Pawn":
             self.board.halfmove_clock += 1
         else:
             self.board.halfmove_clock = 0
@@ -100,24 +101,24 @@ class Chess(object):
 
         if piece is None:
             return []
-        elif piece.lower() == "p":
+        elif piece.name == "Pawn":
             return self.pawn_moves(origin)
-        elif piece.lower() == "n":
+        elif piece.name == "Knight":
             return self.knight_moves(origin)
-        elif piece.lower() == "b":
+        elif piece.name == "Bishop":
             return self.bishop_moves(origin)
-        elif piece.lower() == "r":
+        elif piece.name == "Rook":
             return self.rook_moves(origin)
-        elif piece.lower() == "q":
+        elif piece.name == "Queen":
             return self.queen_moves(origin)
-        elif piece.lower() == "k":
+        elif piece.name == "King":
             return self.king_moves(origin)
         else:
             raise NotImplementedError
 
     def pawn_moves(self, origin):
         moves = []
-        color = "w" if self.board[origin].isupper() else "b"
+        color = self.board[origin].color
         file = origin[0]
         rank = origin[1]
         sign = -1 if color == "w" else 1
@@ -192,7 +193,7 @@ class Chess(object):
 
     def king_moves(self, origin):
         moves = []
-        color = "w" if self.board[origin].isupper() else "b"
+        color = self.board[origin].color
         side = ("K", "Q") if color == "w" else ("k", "q")
         rank = "1" if color == "w" else "8"
 
