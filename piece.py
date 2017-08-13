@@ -52,6 +52,12 @@ class Piece(object):
         if board is not None:
             self.board = board
         self.board[position] = self
+        self.position = position
+
+    def move_to(self, dest):
+        self.board[dest] = self
+        self.board[self.position] = None
+        self.position = dest
 
 
 class Pawn(Piece):
@@ -59,6 +65,15 @@ class Pawn(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.abbreviation = "p" if color == "b" else "P"
+
+    def move_to(self, dest):
+        super().move_to(dest)
+
+        # promotion
+        if self.position[1] in ["1", "8"]:
+            q = Queen(self.color)
+            q.place_at(self.position, self.board)
+            del self
 
 
 class Knight(Piece):
@@ -94,6 +109,16 @@ class King(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.abbreviation = "k" if color == "b" else "K"
+
+    def move_to(self, dest):
+        # castling
+        home_rank = "1" if self.color == "w" else "8"
+        if self.position == "e" + home_rank and dest == "g" + home_rank:
+            self.board["h" + home_rank].move_to("f" + home_rank)
+        elif self.position == "e" + home_rank and dest == "c" + home_rank:
+            self.board["a" + home_rank].move_to("d" + home_rank)
+
+        super().move_to(dest)
 
 
 def main():

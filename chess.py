@@ -35,21 +35,7 @@ class Chess(object):
 
         # update board
         self.history.append(deepcopy(self.board))
-        self.board[origin] = None
-        self.board[dest] = piece
-        # castling
-        if piece == "K" and origin == "e1" and dest == "g1":
-            self.board["h1"] = None
-            self.board["f1"] = abbr2piece("R")
-        elif piece == "K" and origin == "e1" and dest == "c1":
-            self.board["a1"] = None
-            self.board["d1"] = abbr2piece("R")
-        elif piece == "k" and origin == "e8" and dest == "g8":
-            self.board["h8"] = None
-            self.board["f8"] = abbr2piece("r")
-        elif piece == "k" and origin == "e8" and dest == "c8":
-            self.board["a8"] = None
-            self.board["d8"] = abbr2piece("r")
+        piece.move_to(dest)
 
         # player turn
         self.board.playing = "w" if played == "b" else "b"
