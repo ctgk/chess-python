@@ -131,6 +131,16 @@ class Knight(Piece):
         super().__init__(color)
         self.abbreviation = "n" if color == "b" else "N"
 
+    def possible_moves(self):
+        directions = [
+            (-2, -1), (-2, 1), # forward (from white's perspective)
+            (-1, 2), (1, 2), # right
+            (2, 1), (2, -1), # backward
+            (1, -2), (-1, -2) # left
+        ]
+        moves = [self.board.destination(self.position, d) for d in directions]
+        return list(filter(None, moves))
+
 
 class Bishop(Piece):
 

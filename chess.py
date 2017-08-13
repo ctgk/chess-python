@@ -63,9 +63,8 @@ class Chess(object):
             return []
         elif piece.name == "Pawn":
             return piece.possible_moves()
-            # return self.pawn_moves(origin)
         elif piece.name == "Knight":
-            return self.knight_moves(origin)
+            return piece.possible_moves()
         elif piece.name == "Bishop":
             return self.bishop_moves(origin)
         elif piece.name == "Rook":
@@ -76,46 +75,6 @@ class Chess(object):
             return self.king_moves(origin)
         else:
             raise NotImplementedError
-
-    def pawn_moves(self, origin):
-        moves = []
-        color = self.board[origin].color
-        file = origin[0]
-        rank = origin[1]
-        sign = -1 if color == "w" else 1
-
-        # standard move
-        dest = self.board.destination(origin, (sign, 0))
-        if dest is not None:
-            moves.append(dest)
-
-            # moving two squares
-            if (color == "w" and rank == "2") or (color == "b" and rank == "7"):
-                dest = self.board.destination(origin, (2 * sign, 0))
-                if dest is not None:
-                    moves.append(dest)
-
-        # attacking moves
-        dest_candidates = [
-            self.board.destination(origin, (sign, d)) for d in [-1, 1]
-        ]
-        for cand in dest_candidates:
-            if cand is None:
-                continue
-            if self.board.isdifferentcolor(origin, cand):
-                moves.append(cand)
-
-        return moves
-
-    def knight_moves(self, origin):
-        directions = [
-            (-2, -1), (-2, 1), # forward (from white's perspective)
-            (-1, 2), (1, 2), # right
-            (2, 1), (2, -1), # backward
-            (1, -2), (-1, -2) # left
-        ]
-        moves = [self.board.destination(origin, d) for d in directions]
-        return list(filter(None, moves))
 
     def bishop_moves(self, origin):
         directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
