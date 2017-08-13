@@ -114,8 +114,8 @@ class GUI(tk.Frame):
                 if piece is not None:
                     self.canvas.create_image(
                         ((x1 + x2) // 2, (y1 + y2) // 2),
-                        image=self.icons[filled_color + piece],
-                        tags=(piece, "piece")
+                        image=self.icons[filled_color + repr(piece)],
+                        tags=(repr(piece), "piece")
                     )
 
     def click(self, event):
