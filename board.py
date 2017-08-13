@@ -1,4 +1,5 @@
 from error import InvalidFEN, InvalidNotation
+from piece import abbr2piece
 
 
 class Board(object):
@@ -12,6 +13,7 @@ class Board(object):
     pieces = ["k", "q", "r", "b", "n", "p", "K", "Q", "R", "B", "N", "P"]
 
     def __init__(self, fen):
+        self._board = {}
         self.fen = fen
 
     def __repr__(self):
@@ -19,11 +21,11 @@ class Board(object):
 
     def __getitem__(self, notation):
         self.isvalid_notation(notation)
-        return self._position[notation]
+        return self._board[notation]
 
     def __setitem__(self, notation, piece):
         self.isvalid_notation(notation)
-        self._position[notation] = piece
+        self._board[notation] = piece
 
     @property
     def fen(self):
@@ -37,7 +39,7 @@ class Board(object):
         if len(fen_blocks) != 6:
             raise InvalidFEN("FEN must consist of 6 blocks")
 
-        self._position = self.encode_position(fen_blocks[0])
+        self.decode_fen_placement(fen_blocks[0])
         if fen_blocks[1] not in self.players:
             raise InvalidFEN("Unknown player in FEN")
         if fen_blocks[2] != "-":
@@ -56,24 +58,23 @@ class Board(object):
         self.halfmove_clock = int(fen_blocks[4])
         self.fullmove_number = int(fen_blocks[5])
 
-    def encode_position(self, fen_placement):
-        position = {}
+    def decode_fen_placement(self, fen_placement):
         for i in range(1, 9):
             fen_placement = fen_placement.replace(str(i), "-" * i)
 
-        fen_placement_row = fen_placement.split(sep="/")
-        if len(fen_placement_row) != 8:
+        fen_placement_rows = fen_placement.split(sep="/")
+        if len(fen_placement_rows) != 8:
             raise InvalidFEN("There must be eight ranks")
 
-        for rank, pieces_row in zip(self.ranks, fen_placement_row):
-            if len(pieces_row) != 8:
+        for rank, fen_placement_row in zip(self.ranks, fen_placement_rows):
+            if len(fen_placement_row) != 8:
                 raise InvalidFEN("Rank must have eight locations")
-            for file, piece in zip(self.files, pieces_row):
-                if piece == "-":
-                    piece = None
-                position[file + rank] = piece
-
-        return position
+            for file, letter in zip(self.files, fen_placement_row):
+                piece = abbr2piece(letter)
+                if piece is None:
+                    self[file + rank] = piece
+                else:
+                    piece.place_at(file + rank, self)
 
     def update_fen(self):
         fen = ""
@@ -87,7 +88,7 @@ class Board(object):
                     if vacant != 0:
                         fen += str(vacant)
                         vacant = 0
-                    fen += piece
+                    fen += repr(piece)
             fen += "/"
 
         fen = fen[:-1] # remove trailing /
@@ -128,7 +129,7 @@ class Board(object):
     def issamecolor(self, origin, destination):
         if self[origin] is None or self[destination] is None:
             return False
-        elif self[origin].isupper() == self[destination].isupper():
+        elif self[origin].color == self[destination].color:
             return True
         else:
             return False
@@ -136,7 +137,7 @@ class Board(object):
     def isdifferentcolor(self, origin, destination):
         if self[origin] is None or self[destination] is None:
             return False
-        elif self[origin].isupper() == self[destination].isupper():
+        elif self[origin].color == self[destination].color:
             return False
         else:
             return True
