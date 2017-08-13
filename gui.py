@@ -7,7 +7,7 @@ class GUI(tk.Frame):
     rows = 8
     columns = 8
     original_img_size = (100, 100)
-    icon_size = (60, 60)
+    icon_size = (32, 32)
     files = ["a", "b", "c", "d", "e", "f", "g", "h"]
     ranks = ["8", "7", "6", "5", "4", "3", "2", "1"]
     light_color = "#FFDEAD"
