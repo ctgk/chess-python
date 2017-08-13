@@ -18,5 +18,9 @@ class InvalidNotation(ChessError):
     pass
 
 
+class InvalidPiece(ChessError):
+    pass
+
+
 class NotYourTurn(ChessError):
     pass
