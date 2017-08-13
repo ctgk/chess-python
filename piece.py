@@ -29,7 +29,8 @@ class Piece(object):
     def __init__(self, color):
         if color not in ["w", "b"]:
             raise ColorError(f"Unknown color: {color}")
-        self.color = color # which color white or black
+        self.color = color  # which color white or black
+        self.abbreviation = ""
 
     def __repr__(self):
         return self.abbreviation
@@ -39,8 +40,7 @@ class Piece(object):
             return self.__dict__ == other.__dict__
         elif isinstance(other, str):
             return other == self.abbreviation
-        else:
-            return False
+        return False
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -57,7 +57,6 @@ class Piece(object):
         self.home = position
 
     def move_to(self, dest):
-        captured = self.board.isdifferentcolor(self.position, dest)
         self.board[dest] = self
         self.board[self.position] = None
         self.position = dest
@@ -71,8 +70,6 @@ class Pawn(Piece):
 
     def possible_moves(self):
         moves = []
-        file = self.position[0]
-        rank = self.position[1]
         sign = -1 if self.color == "w" else 1
 
         # standard move
@@ -112,8 +109,8 @@ class Pawn(Piece):
 
         # promotion
         if self.position[1] in ["1", "8"]:
-            q = Queen(self.color)
-            q.place_at(self.position, self.board)
+            queen = Queen(self.color)
+            queen.place_at(self.position, self.board)
             del self
 
         # en passant capturing
@@ -134,10 +131,10 @@ class Knight(Piece):
 
     def possible_moves(self):
         directions = [
-            (-2, -1), (-2, 1), # forward (from white's perspective)
-            (-1, 2), (1, 2), # right
-            (2, 1), (2, -1), # backward
-            (1, -2), (-1, -2) # left
+            (-2, -1), (-2, 1),  # forward (from white's perspective)
+            (-1, 2), (1, 2),    # right
+            (2, 1), (2, -1),    # backward
+            (1, -2), (-1, -2)   # left
         ]
         moves = [self.board.destination(self.position, d) for d in directions]
         return list(filter(None, moves))
@@ -153,8 +150,8 @@ class Bishop(Piece):
         directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
         moves = []
 
-        for d in directions:
-            current = deepcopy(d)
+        for dir_ in directions:
+            current = deepcopy(dir_)
             while True:
                 dest = self.board.destination(self.position, current)
                 if dest is None:
@@ -162,7 +159,7 @@ class Bishop(Piece):
                 moves.append(dest)
                 if self.board.isdifferentcolor(self.position, dest):
                     break
-                current = [x + y for x, y in zip(d, current)]
+                current = [x + y for x, y in zip(dir_, current)]
         return moves
 
 
@@ -176,8 +173,8 @@ class Rook(Piece):
         directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
         moves = []
 
-        for d in directions:
-            current = deepcopy(d)
+        for dir_ in directions:
+            current = deepcopy(dir_)
             while True:
                 dest = self.board.destination(self.position, current)
                 if dest is None:
@@ -185,7 +182,7 @@ class Rook(Piece):
                 moves.append(dest)
                 if self.board.isdifferentcolor(self.position, dest):
                     break
-                current = [x + y for x, y in zip(d, current)]
+                current = [x + y for x, y in zip(dir_, current)]
         return moves
 
     def move_to(self, dest):
@@ -226,18 +223,18 @@ class King(Piece):
         rank = "1" if self.color == "w" else "8"
 
         if (
-            self.position == self.home
-            and side[0] in self.board.castling
-            and self.board["f" + rank] is None
-            and self.board["g" + rank] is None
+                self.position == self.home
+                and side[0] in self.board.castling
+                and self.board["f" + rank] is None
+                and self.board["g" + rank] is None
         ):
             moves.append("g" + rank)
         if (
-            self.position == self.home
-            and side[1] in self.board.castling
-            and self.board["d" + rank] is None
-            and self.board["c" + rank] is None
-            and self.board["b" + rank] is None
+                self.position == self.home
+                and side[1] in self.board.castling
+                and self.board["d" + rank] is None
+                and self.board["c" + rank] is None
+                and self.board["b" + rank] is None
         ):
             moves.append("c" + rank)
 
@@ -270,8 +267,8 @@ class King(Piece):
 
 
 def main():
-    p = abbr2piece("P")
-    print(p == "P")
+    piece = abbr2piece("P")
+    print(piece == "P")
 
 
 if __name__ == '__main__':

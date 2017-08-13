@@ -90,7 +90,7 @@ class Board(object):
                 fen += str(vacant)
             fen += "/"
 
-        fen = fen[:-1] # remove trailing /
+        fen = fen[:-1]  # remove trailing /
         fen += " " + self.playing
         fen += " " + self.castling
         fen += " " + self.enpassant_target
@@ -145,21 +145,18 @@ class Board(object):
         dest = dest_file + dest_rank
         if self.issamecolor(origin, dest):
             return None
-        else:
-            return dest
+        return dest
 
     def issamecolor(self, origin, destination):
         if self[origin] is None or self[destination] is None:
             return False
         elif self[origin].color == self[destination].color:
             return True
-        else:
-            return False
+        return False
 
     def isdifferentcolor(self, origin, destination):
         if self[origin] is None or self[destination] is None:
             return False
         elif self[origin].color == self[destination].color:
             return False
-        else:
-            return True
+        return True

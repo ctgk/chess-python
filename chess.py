@@ -1,7 +1,6 @@
 from copy import deepcopy
 from board import Board
-from error import NotYourTurn, InvalidMove
-from piece import abbr2piece
+from error import InvalidMove, NotYourTurn
 
 
 class Chess(object):
@@ -55,14 +54,6 @@ class Chess(object):
             self.board.fullmove_number += 1
 
         self.board.update_fen()
-
-    # def possible_moves(self, origin):
-    #     piece = self.board[origin]
-
-    #     if piece is None:
-    #         return []
-    #     else:
-    #         return piece.possible_moves()
 
 
 def main():

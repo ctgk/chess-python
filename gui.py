@@ -27,7 +27,6 @@ class GUI(tk.Frame):
         "P": "img/white_pawn.png"
     }
 
-
     def __init__(self, master, chess, square_length=64):
         super().__init__(master)
         self.chess = chess
@@ -84,10 +83,17 @@ class GUI(tk.Frame):
         color = self.light_color
         for row in range(self.rows):
             # exchange square color
-            color = self.light_color if color == self.dark_color else self.dark_color
+            if color == self.dark_color:
+                color = self.light_color
+            else:
+                color = self.dark_color
+
             for col in range(self.columns):
                 # exchange square color
-                color = self.light_color if color == self.dark_color else self.dark_color
+                if color == self.dark_color:
+                    color = self.light_color
+                else:
+                    color = self.dark_color
 
                 # define coordinates of top left and bottom right of a square
                 x1 = col * self.square_length
