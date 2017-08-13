@@ -1,3 +1,4 @@
+from copy import deepcopy
 from error import ColorError, InvalidPiece
 
 
@@ -147,6 +148,22 @@ class Bishop(Piece):
     def __init__(self, color):
         super().__init__(color)
         self.abbreviation = "b" if color == "b" else "B"
+
+    def possible_moves(self):
+        directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
+        moves = []
+
+        for d in directions:
+            current = deepcopy(d)
+            while True:
+                dest = self.board.destination(self.position, current)
+                if dest is None:
+                    break
+                moves.append(dest)
+                if self.board.isdifferentcolor(self.position, dest):
+                    break
+                current = [x + y for x, y in zip(d, current)]
+        return moves
 
 
 class Rook(Piece):

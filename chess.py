@@ -66,7 +66,7 @@ class Chess(object):
         elif piece.name == "Knight":
             return piece.possible_moves()
         elif piece.name == "Bishop":
-            return self.bishop_moves(origin)
+            return piece.possible_moves()
         elif piece.name == "Rook":
             return self.rook_moves(origin)
         elif piece.name == "Queen":
@@ -75,22 +75,6 @@ class Chess(object):
             return self.king_moves(origin)
         else:
             raise NotImplementedError
-
-    def bishop_moves(self, origin):
-        directions = [[1, 1], [1, -1], [-1, 1], [-1, -1]]
-        moves = []
-
-        for d in directions:
-            current = deepcopy(d)
-            while True:
-                dest = self.board.destination(origin, current)
-                if dest is None:
-                    break
-                moves.append(dest)
-                if self.board.isdifferentcolor(origin, dest):
-                    break
-                current = [x + y for x, y in zip(d, current)]
-        return moves
 
     def rook_moves(self, origin):
         directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
