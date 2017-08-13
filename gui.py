@@ -122,6 +122,8 @@ class GUI(tk.Frame):
         # selected square
         col = event.x // self.square_length
         row = event.y // self.square_length
+        if (not -1 < col < self.columns) or (not -1 < row < self.rows):
+            return 0
         if (row, col) == self.selected:
             self.selected = None
             self.highlighted[row][col] = False
