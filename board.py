@@ -1,4 +1,4 @@
-from error import InvalidFEN, InvalidNotation
+from error import ColorError, InvalidFEN, InvalidNotation
 from piece import abbr2piece
 
 
@@ -41,10 +41,7 @@ class Board(object):
 
         self.decode_fen_placement(fen_blocks[0])
         if fen_blocks[1] not in self.players:
-            raise InvalidFEN("Unknown player in FEN")
-        if fen_blocks[2] != "-":
-            if any(char not in ["K", "Q", "k", "q"] for char in fen_blocks[2]):
-                raise InvalidFEN("Unrecognizable castling avalability")
+            raise InvalidFEN(f"Unknown player: {fen_blocks[1]}")
         if fen_blocks[3] != "-":
             if not self.isvalid_notation(fen_blocks[3]):
                 raise InvalidFEN("Unrecognizable en passant target square")
@@ -53,7 +50,7 @@ class Board(object):
         if not fen_blocks[5].isdigit():
             raise InvalidFEN("Unknown fullmove number")
         self.playing = fen_blocks[1]
-        self.castling_availability = fen_blocks[2]
+        self.castling = fen_blocks[2]
         self.enpassant_target = fen_blocks[3]
         self.halfmove_clock = int(fen_blocks[4])
         self.fullmove_number = int(fen_blocks[5])
@@ -89,15 +86,40 @@ class Board(object):
                         fen += str(vacant)
                         vacant = 0
                     fen += repr(piece)
+            if vacant != 0:
+                fen += str(vacant)
             fen += "/"
 
         fen = fen[:-1] # remove trailing /
         fen += " " + self.playing
-        fen += " " + self.castling_availability
+        fen += " " + self.castling
         fen += " " + self.enpassant_target
         fen += " " + str(self.halfmove_clock)
         fen += " " + str(self.fullmove_number)
         self._fen = fen
+
+    @property
+    def playing(self):
+        return self._playing
+
+    @playing.setter
+    def playing(self, color):
+        if color not in self.players:
+            raise ColorError(f"Unknown player: {color}")
+        self._playing = color
+
+    @property
+    def castling(self):
+        return self._castling
+
+    @castling.setter
+    def castling(self, string):
+        if string == "":
+            string = "-"
+        if string != "-":
+            if any(char not in ["K", "Q", "k", "q"] for char in string):
+                raise InvalidFEN("Unrecognizable castling avalability")
+        self._castling = string
 
     def isvalid_notation(self, notation):
         if not isinstance(notation, str):
