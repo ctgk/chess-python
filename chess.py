@@ -30,7 +30,7 @@ class Chess(object):
             color = "white" if played == "w" else "black"
             raise NotYourTurn(f"It's not {color}'s turn")
 
-        if dest not in self.available_moves(origin):
+        if dest not in piece.possible_moves():
             raise InvalidMove(f"{origin} cannot move to {dest}")
 
         # update board
@@ -56,72 +56,13 @@ class Chess(object):
 
         self.board.update_fen()
 
-    def available_moves(self, origin):
-        piece = self.board[origin]
+    # def possible_moves(self, origin):
+    #     piece = self.board[origin]
 
-        if piece is None:
-            return []
-        elif piece.name == "Pawn":
-            return piece.possible_moves()
-        elif piece.name == "Knight":
-            return piece.possible_moves()
-        elif piece.name == "Bishop":
-            return piece.possible_moves()
-        elif piece.name == "Rook":
-            return self.rook_moves(origin)
-        elif piece.name == "Queen":
-            return self.queen_moves(origin)
-        elif piece.name == "King":
-            return self.king_moves(origin)
-        else:
-            raise NotImplementedError
-
-    def rook_moves(self, origin):
-        directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
-        moves = []
-
-        for d in directions:
-            current = deepcopy(d)
-            while True:
-                dest = self.board.destination(origin, current)
-                if dest is None:
-                    break
-                moves.append(dest)
-                if self.board.isdifferentcolor(origin, dest):
-                    break
-                current = [x + y for x, y in zip(d, current)]
-        return moves
-
-    def queen_moves(self, origin):
-        return self.bishop_moves(origin) + self.rook_moves(origin)
-
-    def king_moves(self, origin):
-        moves = []
-        color = self.board[origin].color
-        side = ("K", "Q") if color == "w" else ("k", "q")
-        rank = "1" if color == "w" else "8"
-
-        if (
-            side[0] in self.board.castling
-            and self.board["f" + rank] is None
-            and self.board["g" + rank] is None
-        ):
-            moves.append("g" + rank)
-        if (
-            side[1] in self.board.castling
-            and self.board["d" + rank] is None
-            and self.board["c" + rank] is None
-            and self.board["b" + rank] is None
-        ):
-            moves.append("c" + rank)
-
-        directions = [
-            [-1, -1], [-1, 0], [-1, 1],
-            [0, -1], [0, 1],
-            [1, -1], [1, 0], [1, 1]
-        ]
-        moves += [self.board.destination(origin, d) for d in directions]
-        return list(filter(None, moves))
+    #     if piece is None:
+    #         return []
+    #     else:
+    #         return piece.possible_moves()
 
 
 def main():

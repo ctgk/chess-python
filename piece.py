@@ -172,6 +172,22 @@ class Rook(Piece):
         super().__init__(color)
         self.abbreviation = "r" if color == "b" else "R"
 
+    def possible_moves(self):
+        directions = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+        moves = []
+
+        for d in directions:
+            current = deepcopy(d)
+            while True:
+                dest = self.board.destination(self.position, current)
+                if dest is None:
+                    break
+                moves.append(dest)
+                if self.board.isdifferentcolor(self.position, dest):
+                    break
+                current = [x + y for x, y in zip(d, current)]
+        return moves
+
     def move_to(self, dest):
         # erase castiling availability
         if self.color == "w":
@@ -194,12 +210,44 @@ class Queen(Piece):
         super().__init__(color)
         self.abbreviation = "q" if color == "b" else "Q"
 
+    def possible_moves(self):
+        return Bishop.possible_moves(self) + Rook.possible_moves(self)
+
 
 class King(Piece):
 
     def __init__(self, color):
         super().__init__(color)
         self.abbreviation = "k" if color == "b" else "K"
+
+    def possible_moves(self):
+        moves = []
+        side = ("K", "Q") if self.color == "w" else ("k", "q")
+        rank = "1" if self.color == "w" else "8"
+
+        if (
+            self.position == self.home
+            and side[0] in self.board.castling
+            and self.board["f" + rank] is None
+            and self.board["g" + rank] is None
+        ):
+            moves.append("g" + rank)
+        if (
+            self.position == self.home
+            and side[1] in self.board.castling
+            and self.board["d" + rank] is None
+            and self.board["c" + rank] is None
+            and self.board["b" + rank] is None
+        ):
+            moves.append("c" + rank)
+
+        directions = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1], [0, 1],
+            [1, -1], [1, 0], [1, 1]
+        ]
+        moves += [self.board.destination(self.position, d) for d in directions]
+        return list(filter(None, moves))
 
     def move_to(self, dest):
         # castling
