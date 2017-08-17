@@ -36,6 +36,7 @@ class GUI(tk.Frame):
         self.highlighted = [
             [False for _ in range(self.columns)] for _ in range(self.rows)
         ]
+        self.master = master
 
         # create canvas
         canvas_width = self.columns * square_length
@@ -46,6 +47,12 @@ class GUI(tk.Frame):
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
 
         self.statusbar = tk.Frame(self, height=64)
+
+        self.button_quit = tk.Button(self, text="Quit", fg="black", command=self.master.destroy)
+        self.button_quit.pack(side=tk.RIGHT, in_=self.statusbar)
+
+        self.button_reset = tk.Button(self, text="Restart", fg="black", command=self.restart)
+        self.button_reset.pack(side=tk.RIGHT, in_=self.statusbar)
 
         self.label_status = tk.Label(self.statusbar, text="White's turn", fg="black")
         self.label_status.pack(side=tk.LEFT, expand=0, in_=self.statusbar)
@@ -174,3 +181,12 @@ class GUI(tk.Frame):
         if isinstance(destination, tuple):
             destination = self.coords2notation(*destination)
         self.chess.move(origin, destination)
+
+    def restart(self):
+        self.chess.restart()
+        self.selected = None
+        self.highlighted = [
+            [False for _ in range(self.columns)] for _ in range(self.rows)
+        ]
+        self.label_status["text"] = "White's turn"
+        self.refresh()
