@@ -1,6 +1,6 @@
 from copy import deepcopy
 from board import Board
-from error import InvalidMove, NotYourTurn
+from error import InvalidMove, InvalidPiece, NotYourTurn
 
 
 class Chess(object):
@@ -16,12 +16,16 @@ class Chess(object):
         self.board = Board(fen)
         self.history = []
 
+    def restart(self):
+        self.board = Board(self.initial_fen)
+        self.history = []
+
     def move(self, origin, dest):
         piece = self.board[origin]
 
         # if no piece at the origin, exit
         if piece is None:
-            return 0
+            raise InvalidPiece(f"No piece at {origin}")
 
         # raise error if it's not the player's turn
         played = piece.color
