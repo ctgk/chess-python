@@ -47,7 +47,7 @@ class GUI(tk.Frame):
 
         self.statusbar = tk.Frame(self, height=64)
 
-        self.label_status = tk.Label(self.statusbar, text="   White's turn  ", fg="black")
+        self.label_status = tk.Label(self.statusbar, text="White's turn", fg="black")
         self.label_status.pack(side=tk.LEFT, expand=0, in_=self.statusbar)
 
         self.statusbar.pack(expand=False, fill="x", side='bottom')
@@ -152,6 +152,10 @@ class GUI(tk.Frame):
                 self.highlighted[self.selected[0]][self.selected[1]] = True
                 self.highlighted[row][col] = True
                 self.selected = None
+                if self.chess.board.playing == "w":
+                    self.label_status["text"] = "White's turn"
+                else:
+                    self.label_status["text"] = "Black's turn"
         else:
             self.highlight(row, col)
 
