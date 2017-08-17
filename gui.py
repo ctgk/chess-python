@@ -1,5 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
+from error import InvalidMove, InvalidPiece, NotYourTurn
 
 
 class GUI(tk.Frame):
@@ -43,6 +44,13 @@ class GUI(tk.Frame):
         self.canvas.bind("<Configure>", self.refresh)
         self.canvas.bind("<Button-1>", self.click)
         self.canvas.pack(side="top", fill="both", anchor="c", expand=True)
+
+        self.statusbar = tk.Frame(self, height=64)
+
+        self.label_status = tk.Label(self.statusbar, text="   White's turn  ", fg="black")
+        self.label_status.pack(side=tk.LEFT, expand=0, in_=self.statusbar)
+
+        self.statusbar.pack(expand=False, fill="x", side='bottom')
 
         # create icons
         light_bg = Image.new("RGBA", self.original_img_size, self.light_color)
@@ -130,21 +138,31 @@ class GUI(tk.Frame):
         row = event.y // self.square_length
         if (not -1 < col < self.columns) or (not -1 < row < self.rows):
             return 0
-        if (row, col) == self.selected:
-            self.selected = None
-            self.highlighted[row][col] = False
-        elif self.selected is not None:
-            self.move(self.selected, (row, col))
-            self.highlighted[row][col] = True
-            self.selected = None
+
+        if self.selected is not None:
+            try:
+                self.move(self.selected, (row, col))
+            except (InvalidPiece, NotYourTurn, InvalidMove):
+                self.highlighted[self.selected[0]][self.selected[1]] = False
+                self.selected = None
+            else:
+                self.highlighted = [
+                    [False for _ in range(self.columns)] for _ in range(self.rows)
+                ]
+                self.highlighted[self.selected[0]][self.selected[1]] = True
+                self.highlighted[row][col] = True
+                self.selected = None
         else:
-            self.selected = (row, col)
-            self.highlighted = [
-                [False for _ in range(self.columns)] for _ in range(self.rows)
-            ]
-            self.highlighted[row][col] = True
+            self.highlight(row, col)
 
         self.refresh()
+
+    def highlight(self, row, col):
+        notation = self.coords2notation(row, col)
+        piece = self.chess.board[notation]
+        if piece is not None and piece.color == self.chess.board.playing:
+            self.highlighted[row][col] = True
+            self.selected = (row, col)
 
     def move(self, origin, destination):
         if isinstance(origin, tuple):
