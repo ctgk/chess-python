@@ -149,9 +149,10 @@ class GUI(tk.Frame):
         if self.selected is not None:
             try:
                 self.move(self.selected, (row, col))
-            except (InvalidPiece, NotYourTurn, InvalidMove):
+            except (InvalidPiece, NotYourTurn, InvalidMove) as err:
                 self.highlighted[self.selected[0]][self.selected[1]] = False
                 self.selected = None
+                self.label_status["text"] = err.__class__.__name__
             else:
                 self.highlighted = [
                     [False for _ in range(self.columns)] for _ in range(self.rows)
