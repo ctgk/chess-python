@@ -160,3 +160,30 @@ class Board(object):
         elif self[origin].color == self[destination].color:
             return False
         return True
+
+    def king_position(self, color):
+        for pos, piece in self._board.items():
+            if piece is not None and piece.name == "King" and piece.color == color:
+                return pos
+        color = "white" if color == "w" else "black"
+        raise InvalidFEN(f"No king found for {color}")
+
+    def attacked_squares(self, color):
+        """
+        returns attacked squares from the view point of designated color
+
+        Parameters
+        ----------
+        color : str
+            "w" or "b"
+
+        Returns
+        -------
+        squares : list
+            list of attacked squares
+        """
+        squares = []
+        for piece in self._board.values():
+            if piece is not None and piece.color != color:
+                squares.extend(piece.possible_moves())
+        return squares
