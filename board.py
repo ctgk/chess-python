@@ -185,5 +185,5 @@ class Board(object):
         squares = []
         for piece in self._board.values():
             if piece is not None and piece.color != color:
-                squares.extend(piece.possible_moves())
+                squares.extend(piece.attacking_squares())
         return squares

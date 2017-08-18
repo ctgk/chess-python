@@ -66,6 +66,9 @@ class Piece(object):
         self.board[self.position] = None
         self.position = dest
 
+    def attacking_squares(self):
+        return self.possible_moves()
+
     def possible_moves(self):
         raise NotImplementedError
 
@@ -225,34 +228,38 @@ class King(Piece):
         super().__init__(color)
         self.abbreviation = "k" if color == "b" else "K"
 
-    def possible_moves(self):
-        moves = []
-        side = ("K", "Q") if self.color == "w" else ("k", "q")
-        rank = "1" if self.color == "w" else "8"
-
-        if (
-                self.position == self.home
-                and side[0] in self.board.castling
-                and self.board["f" + rank] is None
-                and self.board["g" + rank] is None
-        ):
-            moves.append("g" + rank)
-        if (
-                self.position == self.home
-                and side[1] in self.board.castling
-                and self.board["d" + rank] is None
-                and self.board["c" + rank] is None
-                and self.board["b" + rank] is None
-        ):
-            moves.append("c" + rank)
-
+    def attacking_squares(self):
         directions = [
             [-1, -1], [-1, 0], [-1, 1],
             [0, -1], [0, 1],
             [1, -1], [1, 0], [1, 1]
         ]
-        moves += [self.board.destination(self.position, d) for d in directions]
-        return list(filter(None, moves))
+        squares = [self.board.destination(self.position, d) for d in directions]
+        return list(filter(None, squares))
+
+    def possible_moves(self):
+        moves = []
+        side = ("K", "Q") if self.color == "w" else ("k", "q")
+        rank = "1" if self.color == "w" else "8"
+
+        attacked_squares = self.board.attacked_squares(self.color)
+        if self.position == self.home and self.home not in attacked_squares:
+            if (
+                    side[0] in self.board.castling
+                    and self.board["f" + rank] is None and "f" + rank not in attacked_squares
+                    and self.board["g" + rank] is None and "g" + rank not in attacked_squares
+            ):
+                moves.append("g" + rank)
+            if (
+                    side[1] in self.board.castling
+                    and self.board["d" + rank] is None and "d" + rank not in attacked_squares
+                    and self.board["c" + rank] is None and "c" + rank not in attacked_squares
+                    and self.board["b" + rank] is None and "b" + rank not in attacked_squares
+            ):
+                moves.append("c" + rank)
+
+        moves += self.attacking_squares()
+        return moves
 
     def move_to(self, dest):
         if dest not in self.possible_moves():
