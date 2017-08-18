@@ -20,6 +20,15 @@ class Chess(object):
         self.board = Board(self.initial_fen)
         self.history = []
 
+    def incheck_after(self, origin, dest):
+        board_copy = deepcopy(self.board)
+        piece = board_copy[origin]
+        color = piece.color
+        piece.move_to(dest)
+        king_pos = board_copy.king_position(color)
+        return king_pos in board_copy.attacked_squares(color)
+
+
     def move(self, origin, dest):
         piece = self.board[origin]
 
@@ -33,8 +42,8 @@ class Chess(object):
             color = "white" if played == "w" else "black"
             raise NotYourTurn(f"It's not {color}'s turn")
 
-        if dest not in piece.possible_moves():
-            raise InvalidMove(f"{origin} cannot move to {dest}")
+        if self.incheck_after(origin, dest):
+            raise InvalidMove("The king is under attack")
 
         # update board
         self.history.append(deepcopy(self.board))
