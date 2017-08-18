@@ -1,5 +1,5 @@
 from copy import deepcopy
-from error import ColorError, InvalidPiece
+from error import ColorError, InvalidMove, InvalidPiece
 
 
 def abbr2piece(abbreviation):
@@ -57,9 +57,17 @@ class Piece(object):
         self.home = position
 
     def move_to(self, dest):
+        if dest not in self.possible_moves():
+            raise InvalidMove(
+                f"{self.position} cannot move to {dest}, "
+                f"possible moves are {self.possible_moves()}"
+            )
         self.board[dest] = self
         self.board[self.position] = None
         self.position = dest
+
+    def possible_moves(self):
+        raise NotImplementedError
 
 
 class Pawn(Piece):
@@ -247,6 +255,12 @@ class King(Piece):
         return list(filter(None, moves))
 
     def move_to(self, dest):
+        if dest not in self.possible_moves():
+            raise InvalidMove(
+                f"{self.position} cannot move to {dest}, "
+                f"possible moves are {self.possible_moves()}"
+            )
+
         # castling
         if self.color == "w":
             home_rank = "1"
@@ -256,14 +270,19 @@ class King(Piece):
             table = str.maketrans({"k": "", "q": ""})
 
         if self.position == self.home:
+            # if king moved erase castling availability
             self.board.castling = self.board.castling.translate(table)
 
-        if self.position == self.home and dest == "g" + home_rank:
-            self.board["h" + home_rank].move_to("f" + home_rank)
-        elif self.position == self.home and dest == "c" + home_rank:
-            self.board["a" + home_rank].move_to("d" + home_rank)
+            if dest == "g" + home_rank:
+                # king side castling, move rook
+                self.board["h" + home_rank].move_to("f" + home_rank)
+            elif dest == "c" + home_rank:
+                # queen side castling, move rook
+                self.board["a" + home_rank].move_to("d" + home_rank)
 
-        super().move_to(dest)
+        self.board[dest] = self
+        self.board[self.position] = None
+        self.position = dest
 
 
 def main():
