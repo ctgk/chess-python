@@ -1,6 +1,6 @@
 from copy import deepcopy
 from board import Board
-from error import InvalidMove, InvalidPiece, NotYourTurn
+from error import Check, InvalidMove, InvalidPiece, NotYourTurn
 
 
 class Chess(object):
@@ -28,6 +28,12 @@ class Chess(object):
         king_pos = board_copy.king_position(color)
         return king_pos in board_copy.attacked_squares(color)
 
+    def incheck(self, color):
+        king_pos = self.board.king_position(color)
+        return king_pos in self.board.attacked_squares(color)
+
+    def isdraw(self):
+        pass
 
     def move(self, origin, dest):
         piece = self.board[origin]
@@ -67,6 +73,9 @@ class Chess(object):
             self.board.fullmove_number += 1
 
         self.board.update_fen()
+
+        if self.incheck(self.board.playing):
+            raise Check()
 
 
 def main():
