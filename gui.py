@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageTk
-from error import InvalidMove, InvalidPiece, NotYourTurn
+from error import Check, InvalidMove, InvalidPiece, NotYourTurn
 
 
 class GUI(tk.Frame):
@@ -149,6 +149,14 @@ class GUI(tk.Frame):
         if self.selected is not None:
             try:
                 self.move(self.selected, (row, col))
+            except Check as err:
+                self.highlighted = [
+                    [False for _ in range(self.columns)] for _ in range(self.rows)
+                ]
+                self.highlighted[self.selected[0]][self.selected[1]] = True
+                self.highlighted[row][col] = True
+                self.selected = None
+                self.label_status["text"] = err.__class__.__name__
             except (InvalidPiece, NotYourTurn, InvalidMove) as err:
                 self.highlighted[self.selected[0]][self.selected[1]] = False
                 self.selected = None
