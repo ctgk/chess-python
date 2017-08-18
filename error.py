@@ -2,6 +2,10 @@ class ChessError(Exception):
     pass
 
 
+class Check(ChessError):
+    pass
+
+
 class ColorError(ChessError):
     pass
 
